@@ -1,0 +1,59 @@
+
+# docker-compose.yml: Определяет сервисы, сети и тома для запуска контейнеров PHP и MySQL.
+
+# services: Определяет контейнеры (сервисы), которые будут запущены.
+services:
+  # php: Сервис для веб-приложения на PHP.
+  php:
+    # build: Указывает, как собрать образ контейнера.
+    build:
+      # context: Текущая директория (.) как контекст сборки, содержащий Dockerfile и файлы проекта.
+      context: .
+      # dockerfile: Имя файла с инструкциями сборки (Dockerfile).
+      dockerfile: Dockerfile
+    # ports: Сопоставляет порт 8080 хоста с портом 80 контейнера для доступа к приложению через браузер.
+    # Параметры: "8080:80" - Формат "порт_хоста:порт_контейнера".
+    ports:
+      - "8080:80"
+    # volumes: Монтирует текущую директорию хоста в /var/www/html контейнера для мгновенного обновления кода.
+    # Параметры: .:/var/www/html - Формат "путь_хоста:путь_контейнера".
+    volumes:
+      - .:/var/www/html
+    # container_name: Устанавливает имя контейнера (php_app) для удобной идентификации.
+    # Параметры: Имя (php_app).
+    container_name: php_app
+
+  # db: Сервис для базы данных MySQL.
+  db:
+    # image: Использует официальный образ MySQL версии 8.0 из Docker Hub.
+    # Параметры: Имя образа (mysql:8.0).
+    image: mysql:8.0
+    # environment: Переменные окружения для настройки базы данных.
+    environment:
+      # MYSQL_ROOT_PASSWORD: Пароль для root-пользователя (rootpassword).
+      MYSQL_ROOT_PASSWORD: rootpassword
+      # MYSQL_DATABASE: Имя создаваемой базы данных (photo_app).
+      MYSQL_DATABASE: photo_app
+      # MYSQL_USER: Имя дополнительного пользователя (user).
+      MYSQL_USER: user
+      # MYSQL_PASSWORD: Пароль для пользователя user (password).
+      MYSQL_PASSWORD: password
+    # ports: Сопоставляет порт 3306 хоста с портом 3306 контейнера для доступа к MySQL (например, через клиент).
+    # Параметры: "3306:3306" - Формат "порт_хоста:порт_контейнера".
+    ports:
+      - "3306:3306"
+    # volumes: Сохраняет данные MySQL в именованном томе и монтирует init.sql для инициализации.
+    # Параметры:
+    #   db_data:/var/lib/mysql - Постоянное хранилище для данных MySQL.
+    #   ./init.sql:/docker-entrypoint-initdb.d/init.sql - Скрипт инициализации, выполняется при первом запуске.
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # container_name: Устанавливает имя контейнера (mysql_db).
+    # Параметры: Имя (mysql_db).
+    container_name: mysql_db
+
+# volumes: Определяет именованные тома для постоянного хранения данных.
+volumes:
+  # db_data: Имя тома для хранения данных MySQL, чтобы они сохранялись между перезапусками контейнера.
+  db_data:
